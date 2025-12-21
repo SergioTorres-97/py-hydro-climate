@@ -1,5 +1,4 @@
 #Funciones auxiliares para el desarrollo de los códigos
-
 import os
 import shutil
 
