@@ -1,74 +1,160 @@
-#Funciones auxiliares para el procesamiento de los datos
+# Funciones auxiliares para el procesamiento de los datos
 import pandas as pd
 import numpy as np
 
-#Función para el filtrado de datos
-def filtrarDatos(datos,año_inicial,año_final):
-    datos = datos.loc[año_inicial:año_final]
-    return datos
 
-#Función para la identificación de datos faltantes a escala diaria
-def identificarNAN(datos):
+def filtrar_datos(datos: pd.DataFrame, anio_inicial: str, anio_final: str) -> pd.DataFrame:
+    '''
+    Filtra un DataFrame por un rango de años específico.
+
+    Args:
+        datos: DataFrame con índice de fechas
+        anio_inicial: Año inicial del filtro (formato 'YYYY-MM-DD' o 'YYYY')
+        anio_final: Año final del filtro (formato 'YYYY-MM-DD' o 'YYYY')
+
+    Returns:
+        DataFrame filtrado por el rango de años especificado
+    '''
+    return datos.loc[anio_inicial:anio_final]
+
+
+def identificar_nan(datos: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Identifica y completa datos faltantes a escala diaria.
+
+    Crea un rango completo de fechas diarias entre el inicio y fin de los datos,
+    e inserta NaN donde falten registros.
+
+    Args:
+        datos: DataFrame con índice de fechas (puede tener días faltantes)
+
+    Returns:
+        DataFrame con todas las fechas diarias completadas (NaN donde faltaban datos)
+    '''
+    # Asegurar que el índice sea datetime
     datos.index = pd.to_datetime(datos.index)
+
+    # Obtener primera y última fecha
     fecha_inicio = datos.index[0]
-    fecha_fin = datos.index[datos.shape[0]-1]
-    rango_fechas = pd.date_range(start=fecha_inicio, end=fecha_fin)
-    df = pd.DataFrame(rango_fechas, columns=['Fecha'])
-    df.set_index('Fecha',inplace = True)
+    fecha_fin = datos.index[-1]
 
-    df_fin = df.join(datos)
-    return df_fin
+    # Crear rango completo de fechas diarias
+    rango_fechas = pd.date_range(start=fecha_inicio, end=fecha_fin, freq='D')
+    df_completo = pd.DataFrame(index=rango_fechas)
+    df_completo.index.name = 'Fecha'
 
-#Función para la identificación de datos faltantes a escala horaria
-def IdentificarNAN3h(datos, horas = [7, 13, 18, 19]):
+    # Unir con datos originales (insertar NaN donde falten datos)
+    df_final = df_completo.join(datos)
+
+    return df_final
+
+
+def identificar_nan_horario(datos: pd.DataFrame, horas: list = None) -> pd.DataFrame:
+    '''
+    Identifica y completa datos faltantes a escala horaria para horas específicas.
+
+    Función diseñada para datos de evaporación tomados a horas específicas del día.
+    Maneja el caso especial de las 18:00 y 19:00 (conserva solo una si ambas existen).
+
+    Args:
+        datos: DataFrame con índice de fechas y hora
+        horas: Lista de horas del día a considerar (por defecto [7, 13, 18, 19])
+
+    Returns:
+        DataFrame con registros horarios completos, resolviendo duplicados 18:00/19:00
+    '''
+    if horas is None:
+        horas = [7, 13, 18, 19]
+
+    # Crear rango de fechas diarias
     fechas = pd.date_range(start=datos.index[0], end=datos.index[-1], freq='D')
 
-    horas_vector = pd.to_datetime([f"{fecha.date()} {hora}:00:00" for fecha in fechas for hora in horas])
+    # Generar todas las combinaciones de fecha + hora
+    fechas_horas = [
+        f'{fecha.date()} {hora}:00:00'
+        for fecha in fechas
+        for hora in horas
+    ]
+    horas_vector = pd.to_datetime(fechas_horas)
 
-    dfFechas = pd.DataFrame(horas_vector, columns=['Fecha'])
-    dfFechas.set_index('Fecha', inplace=True)
+    # Crear DataFrame con todas las horas esperadas
+    df_completo = pd.DataFrame(index=horas_vector)
+    df_completo.index.name = 'Fecha'
 
-    datos_new = dfFechas.join(datos)
+    # Unir con datos originales
+    datos_completos = df_completo.join(datos)
 
-    hours_18_19 = datos_new.between_time('18:00', '19:00')
+    # Resolver conflicto entre 18:00 y 19:00 (conservar solo uno si ambos existen)
+    horas_18_19 = datos_completos.between_time('18:00', '19:00')
 
-    to_drop_19 = hours_18_19[(hours_18_19.index.hour == 19) &
-                             (hours_18_19.shift(1)['Valor'].notna())].index
+    # Identificar registros de 19:00 donde 18:00 tiene datos
+    to_drop_19 = horas_18_19[
+        (horas_18_19.index.hour == 19) &
+        (horas_18_19.shift(1)['Valor'].notna())
+        ].index
 
-    to_drop_18 = hours_18_19[(hours_18_19.index.hour == 18) &
-                             (hours_18_19.shift(-1)['Valor'].notna())].index
+    # Identificar registros de 18:00 donde 19:00 tiene datos
+    to_drop_18 = horas_18_19[
+        (horas_18_19.index.hour == 18) &
+        (horas_18_19.shift(-1)['Valor'].notna())
+        ].index
 
-    to_drop = to_drop_19.append(to_drop_18)
-    df = datos_new.drop(to_drop)
+    # Eliminar duplicados
+    indices_eliminar = to_drop_19.union(to_drop_18)
+    df_sin_duplicados = datos_completos.drop(indices_eliminar)
 
-    df_copy = df.copy()
-    df_18 = df_copy[df_copy.index.hour == 18]
+    # Estandarizar hora 18:00 a 19:00
+    df_copia = df_sin_duplicados.copy()
+    df_18 = df_copia[df_copia.index.hour == 18]
     df_18.index = df_18.index + pd.DateOffset(hours=1)
-    df_combined = pd.concat([df_copy[df_copy.index.hour != 18], df_18])
-    df_combined = df_combined.sort_index()
-    df = df_combined
-    return df
 
-def EliminarAtipicosDiarios(datos):
-    MaximosMensuales = datos.resample('M').max()['Valor'].dropna().values
+    # Combinar datos de 19:00 con el resto de horas
+    df_final = pd.concat([
+        df_copia[df_copia.index.hour != 18],
+        df_18
+    ]).sort_index()
 
-    n_boot = 5000               # número de remuestreos
-    stat_func = np.percentile   # estadístico a evaluar
-    p = 97                      # percentil que queremos analizar
+    return df_final
 
-    boot_stats = []
-    n = 48 #Muestra de 3 años
-    for i in range(n_boot):
-        muestra = np.random.choice(MaximosMensuales, size=n, replace=True)
-        boot_stats.append(stat_func(muestra, p))
 
-    boot_stats = np.array(boot_stats)
+def eliminar_atipicos_diarios(datos: pd.DataFrame, n_boot: int = 5000,
+                              percentil: int = 97, tamano_muestra: int = 48) -> pd.DataFrame:
+    '''
+    Elimina valores atípicos diarios usando bootstrap sobre máximos mensuales.
 
-    umbral = np.percentile(boot_stats, p)
+    Aplica técnica de bootstrap para estimar el umbral de valores atípicos
+    basándose en los máximos mensuales de la serie.
 
-    outliers = MaximosMensuales[MaximosMensuales >= umbral]
+    Args:
+        datos: DataFrame con columna 'Valor'
+        n_boot: Número de remuestreos bootstrap (por defecto 5000)
+        percentil: Percentil a evaluar (por defecto 97)
+        tamano_muestra: Tamaño de muestra para bootstrap, equivalente a años*12 (por defecto 48 = 4 años)
 
-    datos[datos[datos.columns[0]] >= outliers.min()] = np.nan
+    Returns:
+        DataFrame con valores atípicos reemplazados por NaN
+    '''
+    # Calcular máximos mensuales
+    maximos_mensuales = datos.resample('M').max()['Valor'].dropna().values
 
-    return datos
+    # Aplicar bootstrap para estimar umbral
+    estadisticos_boot = []
 
+    for _ in range(n_boot):
+        # Remuestreo con reemplazo
+        muestra = np.random.choice(maximos_mensuales, size=tamano_muestra, replace=True)
+        estadisticos_boot.append(np.percentile(muestra, percentil))
+
+    estadisticos_boot = np.array(estadisticos_boot)
+
+    # Calcular umbral como percentil de los estadísticos bootstrap
+    umbral = np.percentile(estadisticos_boot, percentil)
+
+    # Identificar valores atípicos
+    outliers = maximos_mensuales[maximos_mensuales >= umbral]
+
+    # Reemplazar valores atípicos por NaN
+    datos_limpios = datos.copy()
+    datos_limpios[datos_limpios[datos_limpios.columns[0]] >= outliers.min()] = np.nan
+
+    return datos_limpios

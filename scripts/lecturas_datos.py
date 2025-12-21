@@ -1,78 +1,134 @@
-#Funciones para realizar la importación de datos
+# Funciones para realizar la importación de datos
 import pandas as pd
 import numpy as np
 import xarray as xr
 from datetime import datetime
 from typing import Tuple
 
-def AbrirArchivoAqtsWeb(ruta_folder: str, sep = ',') -> pd.DataFrame:
-    data = pd.read_csv(ruta_folder)[['Sello de tiempo (UTC-05:00)','Valor (Millimetres)']]
-    data.columns = ['Fecha','Valor']
-    data['Valor'] = data['Valor'].astype(str).str.replace(",", ".", regex=False)
-    data['Valor'] = data['Valor'].astype(float)
-    data.set_index('Fecha',inplace = True)
+
+def abrir_archivo_aqts_web(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
+    '''
+    Abre y procesa archivos CSV descargados desde AQTS Web.
+
+    Args:
+        ruta_archivo: Ruta completa del archivo CSV
+        sep: Separador del archivo CSV (por defecto coma)
+
+    Returns:
+        DataFrame con índice de fechas y columna 'Valor'
+    '''
+    # Leer archivo y seleccionar columnas relevantes
+    data = pd.read_csv(ruta_archivo)[['Sello de tiempo (UTC-05:00)', 'Valor (Millimetres)']]
+    data.columns = ['Fecha', 'Valor']
+
+    # Convertir valores: reemplazar comas por puntos y convertir a float
+    data['Valor'] = data['Valor'].astype(str).str.replace(',', '.', regex=False).astype(float)
+
+    # Establecer índice de fechas
+    data.set_index('Fecha', inplace=True)
+    data.index = pd.to_datetime(data.index)
+
     return data
+def abrir_archivos_aqts(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
+    '''
+    Abre y procesa archivos CSV exportados desde AQTS.
 
-def AbrirArchivosAQTS(rutaArchivo: str, sep = ',') -> pd.DataFrame:
-    datos = pd.read_csv(rutaArchivo, header=14)[['Timestamp (UTC-05:00)', 'Value']]
+    Args:
+        ruta_archivo: Ruta completa del archivo CSV
+        sep: Separador del archivo CSV (por defecto coma)
+
+    Returns:
+        DataFrame con índice de fechas y columna 'Valor'
+    '''
+    # Leer archivo omitiendo las primeras 14 líneas de encabezado
+    datos = pd.read_csv(ruta_archivo, header=14)[['Timestamp (UTC-05:00)', 'Value']]
     datos.columns = ['Fecha', 'Valor']
+
+    # Establecer índice de fechas
     datos.set_index('Fecha', inplace=True)
-    return datos
-
-def AbrirArchivosNASA(rutaArchivo, formatoFechas = ['YEAR','DOY']):
-    def fecha_desde_anio_y_dia(anio, dia_del_anio):
-      return datetime.strptime(f"{anio} {dia_del_anio}", "%Y %j").date()
-
-    header = pd.read_csv(rutaArchivo, on_bad_lines='skip').values.shape[0] + 1
-    datos = pd.read_csv(rutaArchivo,header = header)
-    fecha = []
-    for i in range(0, datos.shape[0]):
-        fec = fecha_desde_anio_y_dia(datos[formatoFechas[0]].values[i], int(datos[formatoFechas[1]].values[i]))
-        fecha.append(fec)
-
-    datos['Fecha'] = fecha
-    datos.set_index('Fecha', inplace=True)
-
-    datos = datos.replace(-999, np.nan)
-
     datos.index = pd.to_datetime(datos.index)
 
-    columnas = list(datos.columns)
-    columnas.remove(formatoFechas[0])
-    columnas.remove(formatoFechas[1])
-    datos = datos[columnas]
     return datos
+def abrir_archivos_nasa(ruta_archivo: str, formato_fechas: list = None) -> pd.DataFrame:
+    '''
+    Abre y procesa archivos de datos de NASA POWER DATA con formato de año juliano.
 
-def ExtraccionCuboDatos(ruta: str, variable: str, coordenadas: Tuple[float, float]) -> pd.DataFrame:
+    Args:
+        ruta_archivo: Ruta completa del archivo CSV
+        formato_fechas: Lista con nombres de columnas [año, día_juliano]
 
-    for iter in range(0, 3):
-        if iter == 0:
-            fecha_inicial, fecha_final = '1991-01-01', '2000-12-31'
-        else:
-            fecha_inicial = f'{int(fecha_inicial[0:4]) + 10}-01-01'
-            fecha_final = f'{int(fecha_final[0:4]) + 10}-12-31'
+    Returns:
+        DataFrame con índice de fechas y variables climáticas
+    '''
+    if formato_fechas is None:
+        formato_fechas = ['YEAR', 'DOY']
 
-        # Abrir el archivo de datos
-        data = xr.open_dataset(f'{ruta}/{variable}_dia_{fecha_inicial[0:4]}_{int(fecha_final[0:4])}.nc')
+    def _fecha_desde_anio_y_dia(anio: int, dia_del_anio: int) -> datetime.date:
+        '''Convierte año y día juliano a fecha'''
+        return datetime.strptime(f'{anio} {dia_del_anio}', '%Y %j').date()
 
-        # Extraer la variable principal y seleccionar la coordenada más cercana
-        data_coor = data[list(data.data_vars)[0]].sel(
-            lat=coordenadas[0], lon=coordenadas[1], method='nearest'
+    # Determinar número de líneas de encabezado
+    header = pd.read_csv(ruta_archivo, on_bad_lines='skip').values.shape[0] + 1
+    datos = pd.read_csv(ruta_archivo, header=header)
+
+    # Crear columna de fechas a partir de año y día juliano
+    datos['Fecha'] = datos.apply(
+        lambda row: _fecha_desde_anio_y_dia(row[formato_fechas[0]], int(row[formato_fechas[1]])),
+        axis=1
+    )
+    datos.set_index('Fecha', inplace=True)
+
+    # Reemplazar valores faltantes (-999 es el código de NASA para datos faltantes)
+    datos = datos.replace(-999, np.nan)
+
+    # Convertir índice a datetime
+    datos.index = pd.to_datetime(datos.index)
+
+    # Eliminar columnas de año y día juliano (ya no son necesarias)
+    datos = datos.drop(columns=formato_fechas)
+
+    return datos
+def extraccion_cubo_datos(ruta: str, variable: str, coordenadas: Tuple[float, float]) -> pd.DataFrame:
+    '''
+    Extrae series temporales de archivos NetCDF para una coordenada específica.
+
+    Args:
+        ruta: Directorio donde se encuentran los archivos NetCDF
+        variable: Nombre de la variable a extraer
+        coordenadas: Tupla (latitud, longitud) del punto a extraer
+
+    Returns:
+        DataFrame con serie temporal completa 1991-2020
+    '''
+    dataframes = []
+
+    # Procesar datos en bloques de 10 años (1991-2000, 2001-2010, 2011-2020)
+    for decada in range(3):
+        # Calcular fechas del período
+        anio_inicio = 1991 + (decada * 10)
+        anio_fin = 2000 + (decada * 10)
+        fecha_inicial = f'{anio_inicio}-01-01'
+        fecha_final = f'{anio_fin}-12-31'
+
+        # Abrir archivo NetCDF correspondiente
+        archivo_nc = f'{ruta}/{variable}_dia_{anio_inicio}_{anio_fin}.nc'
+        data = xr.open_dataset(archivo_nc)
+
+        # Extraer variable para la coordenada más cercana
+        nombre_variable = list(data.data_vars)[0]
+        data_coordenada = data[nombre_variable].sel(
+            lat=coordenadas[0],
+            lon=coordenadas[1],
+            method='nearest'
         ).sel(time=slice(fecha_inicial, fecha_final)).values
 
-        # Crear un rango de fechas diarias
-        df_fechas = pd.date_range(start=fecha_inicial, end=fecha_final)
+        # Crear DataFrame para este período
+        rango_fechas = pd.date_range(start=fecha_inicial, end=fecha_final)
+        df_periodo = pd.DataFrame(data_coordenada, index=rango_fechas, columns=['Valor'])
+        dataframes.append(df_periodo)
 
-        # Armar el DataFrame
-        if iter == 0:
-            df = pd.DataFrame(data_coor, index=df_fechas, columns=['Valor'])
-        else:
-            df_aux = pd.DataFrame(data_coor, index=df_fechas, columns=['Valor'])
-            df = pd.concat([df, df_aux])
+    # Concatenar todos los períodos
+    df_completo = pd.concat(dataframes)
+    df_completo.index.name = 'Fecha'
 
-    # Cambiar nombre del índice
-    df.index.name = 'Fecha'
-
-    return df
-
-
+    return df_completo
