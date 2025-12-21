@@ -1,24 +1,38 @@
-# Análisis Climático Multifuente
-
 <div align="center">
 
 ```
-   ╔═══════════════════════════════════════════════════════════╗
-   ║                                                           ║
-   ║     Pre-procesamiento y Análisis de Datos Climáticos     ║
-   ║                                                           ║
-   ╚═══════════════════════════════════════════════════════════╝
+    ╔════════════════════════════════════════════════════════╗
+    ║                                                        ║
+    ║          ██████╗ ██╗   ██╗      ██╗  ██╗              ║
+    ║          ██╔══██╗╚██╗ ██╔╝      ██║  ██║              ║
+    ║          ██████╔╝ ╚████╔╝ █████╗███████║              ║
+    ║          ██╔═══╝   ╚██╔╝  ╚════╝██╔══██║              ║
+    ║          ██║        ██║         ██║  ██║              ║
+    ║          ╚═╝        ╚═╝         ╚═╝  ╚═╝              ║
+    ║                                                        ║
+    ║              ~ hydro · climate ~                       ║
+    ║                                                        ║
+    ║         🌧️  💧  ☁️  📊  🌡️  📈                          ║
+    ║                                                        ║
+    ╚════════════════════════════════════════════════════════╝
 ```
 
-**Transforma datos climáticos brutos en insights visuales**
+# py-hydro.climate
+
+**Herramientas Python para análisis hidrometeorológico y climático**
+
+*Transforma datos climáticos multifuente en insights visuales*
+
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 </div>
 
 ---
 
-## Descripción del Proyecto
+## 📋 Descripción del Proyecto
 
-Este repositorio contiene herramientas de **pre-procesamiento, análisis estadístico y visualización** de datos climáticos provenientes de **múltiples fuentes**. El objetivo es facilitar el análisis de series temporales climáticas mediante funciones modulares y reutilizables.
+**py-hydro.climate** es un conjunto de herramientas de **pre-procesamiento, análisis estadístico y visualización** de datos hidrometeorológicos y climáticos provenientes de **múltiples fuentes**. El objetivo es facilitar el análisis de series temporales climáticas mediante funciones modulares y reutilizables.
 
 ### ¿Qué puedes hacer con este proyecto?
 
@@ -29,9 +43,9 @@ Este repositorio contiene herramientas de **pre-procesamiento, análisis estadí
 
 ---
 
-## Características Principales
+## ✨ Características Principales
 
-### Lectura de Datos Multifuente
+### 📁 Lectura de Datos Multifuente
 
 El módulo `lecturas_datos.py` soporta:
 
@@ -40,7 +54,7 @@ El módulo `lecturas_datos.py` soporta:
 - **NASA POWER** - Datos satelitales y reanálisis
 - **NetCDF** - Cubos de datos climáticos multidimensionales
 
-### Análisis Estadístico
+### 📊 Análisis Estadístico
 
 El módulo `estadisticos.py` incluye:
 
@@ -48,7 +62,7 @@ El módulo `estadisticos.py` incluye:
 - **Agregaciones temporales** personalizables (diario, mensual, anual)
 - Manejo inteligente de **datos faltantes**
 
-### Visualizaciones Interactivas
+### 📈 Visualizaciones Interactivas
 
 El módulo `graficas.py` genera:
 
@@ -59,7 +73,7 @@ El módulo `graficas.py` genera:
 
 ---
 
-## Estructura del Proyecto
+## 📦 Estructura del Proyecto
 
 ```
 Climatologia/
@@ -78,7 +92,7 @@ Climatologia/
 
 ---
 
-## Instalación Rápida
+## 🚀 Instalación Rápida
 
 ### Requisitos Previos
 
@@ -120,7 +134,7 @@ pip install pandas numpy matplotlib seaborn xarray openpyxl
 
 ---
 
-## Guía de Uso Rápida
+## 💻 Guía de Uso Rápida
 
 ### Ejemplo 1: Leer datos de AQTS Web
 
@@ -169,7 +183,7 @@ datos_nc = ExtraccionCuboDatos(
 
 ---
 
-## Ejemplos Visuales
+## 🎨 Ejemplos Visuales
 
 ### Boxplot Mensual
 Visualiza la distribución de datos climáticos por mes, incluyendo:
@@ -185,7 +199,7 @@ Genera una matriz de 12 histogramas (uno por mes) mostrando:
 
 ---
 
-## Contribuir
+## 🤝 Contribuir
 
 **¡Tus contribuciones son bienvenidas!**
 
@@ -206,7 +220,7 @@ Si tienes ideas para mejorar este proyecto:
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
 - [ ] Agregar tests unitarios completos
 - [ ] Implementar lectura de más formatos (GeoTIFF, HDF5)
@@ -217,7 +231,7 @@ Si tienes ideas para mejorar este proyecto:
 
 ---
 
-## Feedback y Soporte
+## 💬 Feedback y Soporte
 
 **¿Necesitas ayuda o tienes sugerencias?**
 
@@ -227,23 +241,7 @@ Si tienes ideas para mejorar este proyecto:
 
 ---
 
-## Licencia
-
-Este proyecto está disponible bajo la licencia que especifiques.
-
----
-
-<div align="center">
-
-**¡Gracias por tu interés en este proyecto!**
-
-Si te resultó útil, considera darle una ⭐ al repositorio
-
-</div>
-
----
-
-## Tecnologías Utilizadas
+## 🛠️ Tecnologías Utilizadas
 
 - **pandas** - Manipulación de datos tabulares
 - **numpy** - Operaciones numéricas
@@ -254,4 +252,27 @@ Si te resultó útil, considera darle una ⭐ al repositorio
 
 ---
 
-**¿Listo para explorar tus datos climáticos?** Clona el repo y empieza a analizar.
+## 👨‍💻 Autor
+
+**Sergio Torres**
+- Email: [sertorrespira@gmail.com](mailto:sertorrespira@gmail.com)
+
+---
+
+## 📄 Licencia
+
+Este proyecto está disponible bajo la licencia MIT.
+
+---
+
+<div align="center">
+
+**¿Listo para explorar tus datos climáticos?**
+
+Clona el repo y empieza a analizar.
+
+**¡Gracias por tu interés en este proyecto!**
+
+Si te resultó útil, considera darle una ⭐ al repositorio
+
+</div>
