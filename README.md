@@ -1,21 +1,9 @@
 <div align="center">
 
-```
-    ╔════════════════════════════════════════════════════════╗
-    ║                                                        ║
-    ║          ██████╗ ██╗   ██╗      ██╗  ██╗              ║
-    ║          ██╔══██╗╚██╗ ██╔╝      ██║  ██║              ║
-    ║          ██████╔╝ ╚████╔╝ █████╗███████║              ║
-    ║          ██╔═══╝   ╚██╔╝  ╚════╝██╔══██║              ║
-    ║          ██║        ██║         ██║  ██║              ║
-    ║          ╚═╝        ╚═╝         ╚═╝  ╚═╝              ║
-    ║                                                        ║
-    ║              ~ hydro · climate ~                       ║
-    ║                                                        ║
-    ║         🌧️  💧  ☁️  📊  🌡️  📈                          ║
-    ║                                                        ║
-    ╚════════════════════════════════════════════════════════╝
-```
+
+<p align="center">
+  <img src="docs/logo.png" width="300">
+</p>
 
 # py-hydro.climate
 
@@ -32,7 +20,7 @@
 
 ## 📋 Descripción del Proyecto
 
-**py-hydro.climate** es un conjunto de herramientas de **pre-procesamiento, análisis estadístico y visualización** de datos hidrometeorológicos y climáticos provenientes de **múltiples fuentes**. El objetivo es facilitar el análisis de series temporales climáticas mediante funciones modulares y reutilizables.
+**py-hydro-climate** es un conjunto de herramientas de **pre-procesamiento, análisis estadístico y visualización** de datos hidrometeorológicos y climáticos provenientes de **múltiples fuentes**. El objetivo es facilitar el análisis de series temporales climáticas mediante funciones modulares y reutilizables.
 
 ### ¿Qué puedes hacer con este proyecto?
 
@@ -49,8 +37,8 @@
 
 El módulo `lecturas_datos.py` soporta:
 
-- **AQTS Web** - Datos de estaciones hidrometeorológicas
-- **AQTS Local** - Archivos CSV con formato AQTS
+- **AQTS Web** - Datos de estaciones hidrometeorológicas en formato AQTS
+- **AQTS APP** - Datos de estaciones hidrometeorológicas en formato AQTS
 - **NASA POWER** - Datos satelitales y reanálisis
 - **NetCDF** - Cubos de datos climáticos multidimensionales
 
@@ -176,7 +164,7 @@ from scripts.lecturas_datos import ExtraccionCuboDatos
 # Extraer serie temporal de una coordenada específica
 datos_nc = ExtraccionCuboDatos(
     ruta='path/to/netcdf/folder',
-    variable='precipitacion',
+    variable='prcp',
     coordenadas=(4.6097, -74.0817)  # Bogotá, Colombia
 )
 ```
