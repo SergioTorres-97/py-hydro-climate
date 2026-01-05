@@ -135,7 +135,7 @@ def eliminar_atipicos_diarios(datos: pd.DataFrame, n_boot: int = 5000,
         DataFrame con valores atípicos reemplazados por NaN
     '''
     # Calcular máximos mensuales
-    maximos_mensuales = datos.resample('M').max()['Valor'].dropna().values
+    maximos_mensuales = datos.resample('ME').max()['Valor'].dropna().values
 
     # Aplicar bootstrap para estimar umbral
     estadisticos_boot = []

@@ -22,7 +22,9 @@ coordenadas = [5.7491,-73.328] #lat, lon
 
 #Uso de la función
 data = extraccion_cubo_datos(ruta,variable,coordenadas)
-data[data['Valor'] > 80] = np.nan
+# data[data['Valor'] > 80] = np.nan
+data = eliminar_atipicos_diarios(data,n_boot= 5000,percentil=97,tamano_muestra=48)
+data['Valor'] = data['Valor'].fillna(data[['Valor']].median())
 
 print('DATOS EXTRAÍDOS CORRECTAMENTE')
 

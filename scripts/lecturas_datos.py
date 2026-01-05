@@ -29,6 +29,7 @@ def abrir_archivo_aqts_web(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
     data.index = pd.to_datetime(data.index)
 
     return data
+
 def abrir_archivos_aqts(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
     '''
     Abre y procesa archivos CSV exportados desde AQTS.
@@ -49,6 +50,7 @@ def abrir_archivos_aqts(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
     datos.index = pd.to_datetime(datos.index)
 
     return datos
+
 def abrir_archivos_nasa(ruta_archivo: str, formato_fechas: list = None) -> pd.DataFrame:
     '''
     Abre y procesa archivos de datos de NASA POWER DATA con formato de año juliano.
@@ -88,6 +90,7 @@ def abrir_archivos_nasa(ruta_archivo: str, formato_fechas: list = None) -> pd.Da
     datos = datos.drop(columns=formato_fechas)
 
     return datos
+
 def extraccion_cubo_datos(ruta: str, variable: str, coordenadas: Tuple[float, float]) -> pd.DataFrame:
     '''
     Extrae series temporales de archivos NetCDF para una coordenada específica.
