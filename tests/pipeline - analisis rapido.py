@@ -65,5 +65,3 @@ tablaEstDescMen.to_excel(os.path.join(rutaGuardado, 'Estadisticos mensuales.xlsx
 tablaEstDescAnual.to_excel(os.path.join(rutaGuardado, 'Estadisticos anuales.xlsx'))
 
 print('ESTADISTICOS DESCRIPTIVOS  A NIVEL ANUAL Y MENSUAL ELABORADOS CORRECTAMENTE')
-
-

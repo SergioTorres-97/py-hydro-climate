@@ -18,7 +18,7 @@ def abrir_archivo_aqts_web(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
         DataFrame con índice de fechas y columna 'Valor'
     '''
     # Leer archivo y seleccionar columnas relevantes
-    data = pd.read_csv(ruta_archivo)[['Sello de tiempo (UTC-05:00)', 'Valor (Millimetres)']]
+    data = pd.read_csv(ruta_archivo, sep = sep)[['Sello de tiempo (UTC-05:00)', 'Valor (Millimetres)']]
     data.columns = ['Fecha', 'Valor']
 
     # Convertir valores: reemplazar comas por puntos y convertir a float
@@ -42,7 +42,7 @@ def abrir_archivos_aqts(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
         DataFrame con índice de fechas y columna 'Valor'
     '''
     # Leer archivo omitiendo las primeras 14 líneas de encabezado
-    datos = pd.read_csv(ruta_archivo, header=14)[['Timestamp (UTC-05:00)', 'Value']]
+    datos = pd.read_csv(ruta_archivo, header=14, sep = sep)[['Timestamp (UTC-05:00)', 'Value']]
     datos.columns = ['Fecha', 'Valor']
 
     # Establecer índice de fechas
@@ -51,7 +51,7 @@ def abrir_archivos_aqts(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
 
     return datos
 
-def abrir_archivos_nasa(ruta_archivo: str, formato_fechas: list = None) -> pd.DataFrame:
+def abrir_archivos_nasa(ruta_archivo: str, sep: str = ',', formato_fechas: list = None) -> pd.DataFrame:
     '''
     Abre y procesa archivos de datos de NASA POWER DATA con formato de año juliano.
 
@@ -71,7 +71,7 @@ def abrir_archivos_nasa(ruta_archivo: str, formato_fechas: list = None) -> pd.Da
 
     # Determinar número de líneas de encabezado
     header = pd.read_csv(ruta_archivo, on_bad_lines='skip').values.shape[0] + 1
-    datos = pd.read_csv(ruta_archivo, header=header)
+    datos = pd.read_csv(ruta_archivo, header=header, sep = sep)
 
     # Crear columna de fechas a partir de año y día juliano
     datos['Fecha'] = datos.apply(
@@ -88,6 +88,59 @@ def abrir_archivos_nasa(ruta_archivo: str, formato_fechas: list = None) -> pd.Da
 
     # Eliminar columnas de año y día juliano (ya no son necesarias)
     datos = datos.drop(columns=formato_fechas)
+
+    return datos
+
+def abrir_archivos_giovanni(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
+    """
+    Abre y procesa archivos CSV del sistema Giovanni.
+
+    Args:
+        ruta_archivo: Ruta completa del archivo CSV a procesar
+
+    Returns:
+        DataFrame con índice de fechas y valores procesados
+    """
+    # Leer archivo CSV omitiendo las primeras 8 líneas de metadata/encabezado
+    # que son características de los archivos exportados de Giovanni
+    datos = pd.read_csv(ruta_archivo, header=8, sep = sep)
+
+    # Renombrar columnas para tener nombres descriptivos y consistentes
+    datos.columns = ['Fecha', 'Valor']
+
+    # Convertir la columna 'Fecha' en el índice del DataFrame
+    datos.set_index('Fecha', inplace=True)
+
+    # Convertir el índice de tipo string a objetos datetime para
+    datos.index = pd.to_datetime(datos.index)
+
+    # Reemplazar el valor centinela -9999 (dato faltante) con NaN
+    datos = datos.replace(-9999, np.nan)
+
+    return datos
+
+def abrir_archivos_automaticas(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
+    """
+    Abre y procesa archivos CSV de estaciones automáticas.
+
+    Args:
+        ruta_archivo: Ruta completa del archivo CSV a procesar
+        sep: Separador de columnas (por defecto coma ',')
+
+    Returns:
+        DataFrame con índice de fechas y valores procesados
+    """
+    # Leer archivo CSV desde la primera línea (header=0)
+    datos = pd.read_csv(ruta_archivo, header=0, sep=sep)
+
+    # Renombrar columnas para tener nombres descriptivos y consistentes
+    datos.columns = ['Fecha', 'Valor']
+
+    # Convertir la columna 'Fecha' en el índice del DataFrame
+    datos.set_index('Fecha', inplace=True)
+
+    # Convertir el índice de tipo string a objetos datetime para
+    datos.index = pd.to_datetime(datos.index)
 
     return datos
 
