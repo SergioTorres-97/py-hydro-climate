@@ -18,7 +18,7 @@ def abrir_archivo_aqts_web(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
         DataFrame con índice de fechas y columna 'Valor'
     '''
     # Leer archivo y seleccionar columnas relevantes
-    data = pd.read_csv(ruta_archivo, sep = sep)[['Sello de tiempo (UTC-05:00)', 'Valor (Millimetres)']]
+    data = pd.read_csv(ruta_archivo, sep = sep)
     data.columns = ['Fecha', 'Valor']
 
     # Convertir valores: reemplazar comas por puntos y convertir a float
@@ -75,7 +75,7 @@ def abrir_archivos_nasa(ruta_archivo: str, sep: str = ',', formato_fechas: list 
 
     # Crear columna de fechas a partir de año y día juliano
     datos['Fecha'] = datos.apply(
-        lambda row: _fecha_desde_anio_y_dia(row[formato_fechas[0]], int(row[formato_fechas[1]])),
+        lambda row: _fecha_desde_anio_y_dia(int(row[formato_fechas[0]]), int(row[formato_fechas[1]])),
         axis=1
     )
     datos.set_index('Fecha', inplace=True)
@@ -188,3 +188,28 @@ def extraccion_cubo_datos(ruta: str, variable: str, coordenadas: Tuple[float, fl
     df_completo.index.name = 'Fecha'
 
     return df_completo
+
+def abrir_archivos_dhime(ruta: str, sep: str = ',') -> pd.DataFrame:
+    """
+    Abre y procesa archivos CSV del sistema DHIME.
+
+    Args:
+        ruta: Ruta completa del archivo CSV a procesar
+        sep: Separador de columnas (por defecto coma ',')
+
+    Returns:
+        DataFrame con índice de fechas y valores procesados
+    """
+    # Leer archivo CSV
+    datos = pd.read_csv(ruta, header=0, sep=sep)[['Fecha','Valor']]
+
+    # Renombrar columnas para tener nombres descriptivos y consistentes
+    datos.columns = ['Fecha', 'Valor']
+
+    # Convertir la columna 'Fecha' en el índice del DataFrame
+    datos.set_index('Fecha', inplace=True)
+
+    # Convertir el índice de tipo string a objetos datetime para
+    datos.index = pd.to_datetime(datos.index, format = 'mixed')
+
+    return datos
