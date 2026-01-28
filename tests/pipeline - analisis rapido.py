@@ -55,8 +55,69 @@ print('GRÁFICAS ELABORADA CORRECTAMENTE')
 #Agregación de datos
 dataMensual = agregados_ideam(data, num_datos_minimo = 0.6*30, frecuencia = 'ME', estadistico = 'mean')
 dataAnual = agregados_ideam(data, num_datos_minimo = 0.6*365, frecuencia = 'YE', estadistico = 'mean')
+dataMaxAnual = agregados_ideam(data, num_datos_minimo = 0.6*365, frecuencia = 'YE', estadistico = 'max')
 
 print('AGREGACIÓN DE DATOS A NIVEL ANUAL Y MENSUAL ELABORADAS CORRECTAMENTE')
+
+#Se grafican los datos mensuales
+labels = {
+    'titulo' : 'Serie mensual de temperatura',
+    'ylabel' : 'Temperatura [°C]',
+    'xlabel' : 'Fecha',
+}
+ylims = {
+    'y_bajo' : 10,
+    'y_alto' : 30
+}
+
+rutaGuardadoGraficas = os.path.join(rutaGuardado, 'Temperatura mensual.png')
+graficar_serie_temporal(dataMensual,
+                        labels = [labels['titulo'], labels['xlabel'], labels['ylabel']],
+                        ylims = [ylims['y_bajo'], ylims['y_alto']],
+                        color = '#AB0303',
+                        ruta_guardado = rutaGuardadoGraficas)
+
+print('GRÁFICAS ELABORADA CORRECTAMENTE')
+
+#Se grafican los datos anuales
+labels = {
+    'titulo' : 'Serie anual de temperatura',
+    'ylabel' : 'Temperatura [°C]',
+    'xlabel' : 'Fecha',
+}
+ylims = {
+    'y_bajo' : 10,
+    'y_alto' : 30
+}
+
+rutaGuardadoGraficas = os.path.join(rutaGuardado, 'Temperatura mensual.png')
+graficar_serie_temporal(dataAnual,
+                        labels = [labels['titulo'], labels['xlabel'], labels['ylabel']],
+                        ylims = [ylims['y_bajo'], ylims['y_alto']],
+                        color = '#AB0303',
+                        ruta_guardado = rutaGuardadoGraficas)
+
+print('GRÁFICAS ELABORADA CORRECTAMENTE')
+
+#Se grafican los datos máximos anuales
+labels = {
+    'titulo' : 'Serie máxima anual de temperatura',
+    'ylabel' : 'Temperatura [°C]',
+    'xlabel' : 'Fecha',
+}
+ylims = {
+    'y_bajo' : 10,
+    'y_alto' : 30
+}
+
+rutaGuardadoGraficas = os.path.join(rutaGuardado, 'Temperatura mensual.png')
+graficar_serie_temporal(dataMaxAnual,
+                        labels = [labels['titulo'], labels['xlabel'], labels['ylabel']],
+                        ylims = [ylims['y_bajo'], ylims['y_alto']],
+                        color = '#AB0303',
+                        ruta_guardado = rutaGuardadoGraficas)
+
+print('GRÁFICAS ELABORADA CORRECTAMENTE')
 
 #Estadistícos descriptivos
 tablaEstDescMen = estadisticos_desc_mensuales(dataMensual)
