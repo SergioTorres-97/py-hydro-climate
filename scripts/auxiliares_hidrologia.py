@@ -188,3 +188,38 @@ def BloquesALternos(k, m, n, TR, duracion, intervalo, ruta_guardado):
     plt.show()
 
     return bloquesAlternos
+
+def graficarHidrogramasRAS(ruta_datos,hidrogramas,label,ruta_guardado):
+    Q = pd.read_excel(ruta_datos)
+    Q = Q.iloc[6:]
+    Q = Q.drop(Q.columns[0], axis = 1)
+    Q.columns = ['Fecha'] + ['TR ' + str(item) for item in hidrogramas]
+    Q['Fecha'] = pd.to_datetime(Q['Fecha'], format='%Y-%m-%d %H:%M:%S')
+    Q['Fecha'] = Q['Fecha'].dt.strftime('%H:%M')
+    Q.set_index('Fecha',inplace= True)
+
+    time = Q.index
+
+    for columna in Q.columns:
+        Q[columna] = pd.to_numeric(Q[columna], errors='coerce')
+
+    plt.figure(figsize=(15, 6))
+    colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#008000', '#800000']
+    for i in range(len(hidrogramas)):
+        # print(Q[Q.columns[i]])
+        plt.plot(time, Q[Q.columns[i]].values*1000, color = colors[i], label = f'{label} : {hidrogramas[i]}')
+
+    plt.ylim(0)
+    plt.xlim(time[0], time[len(time) - 1])
+    plt.xticks(rotation=45, size='medium')
+
+    plt.ylabel('Caudal [l/s]',fontsize = 12,fontweight = 'bold')
+    plt.minorticks_on()
+    plt.grid(which='major', linestyle='-', linewidth='0.5')
+    plt.grid(which='minor', linestyle=':', linewidth='0.5')
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+
+    plt.legend()
+    plt.savefig(ruta_guardado + '/Hidrogramas.png', bbox_inches="tight")
+    plt.show()
