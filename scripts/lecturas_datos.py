@@ -18,8 +18,7 @@ def abrir_archivo_aqts_web(ruta_archivo: str, sep: str = ',') -> pd.DataFrame:
         DataFrame con índice de fechas y columna 'Valor'
     '''
     # Leer archivo y seleccionar columnas relevantes
-    data = pd.read_csv(ruta_archivo, sep = sep)
-    data.columns = ['Fecha', 'Valor']
+    data = pd.read_csv(ruta_archivo, sep = sep, header = 0)[['Fecha', 'Valor']]
 
     # Convertir valores: reemplazar comas por puntos y convertir a float
     data['Valor'] = data['Valor'].astype(str).str.replace(',', '.', regex=False).astype(float)

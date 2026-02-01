@@ -6,9 +6,16 @@ matplotlib.use('qtagg')
 import matplotlib.pyplot as plt
 from typing import List, Tuple, Optional
 
+from typing import List, Tuple, Optional, Literal
+import pandas as pd
+import matplotlib.pyplot as plt
 
-def graficar_serie_temporal(data: pd.DataFrame, labels: List[str], ylims: Tuple[float, float],
-                            color: str, ruta_guardado: Optional[str] = None) -> None:
+def graficar_serie_temporal(data: pd.DataFrame,
+                            labels: List[str],
+                            ylims: Tuple[float, float],
+                            color: str,
+                            tipo_grafico: Literal['linea', 'barras'] = 'linea',
+                            ruta_guardado: Optional[str] = None) -> None:
     '''
     Genera un gráfico de serie temporal con formato personalizado.
 
@@ -16,21 +23,31 @@ def graficar_serie_temporal(data: pd.DataFrame, labels: List[str], ylims: Tuple[
         data: DataFrame con índice temporal y una columna de valores
         labels: Lista con [título, etiqueta_x, etiqueta_y]
         ylims: Tupla con límites del eje Y (min, max)
-        color: Color de la línea de la serie
+        color: Color de la línea/barras de la serie
+        tipo_grafico: Tipo de gráfico ('linea' o 'barras'). Por defecto 'linea'
         ruta_guardado: Ruta donde guardar la figura (opcional, None para no guardar)
 
     Returns:
         None (muestra el gráfico)
 
-    Ejemplo:
+    Ejemplos:
         >>> labels = ['Precipitación Mensual', 'Fecha', 'Precipitación (mm)']
-        >>> graficar_serie_temporal(datos, labels, (0, 500), 'blue', './grafico.png')
+        >>> # Gráfico de líneas
+        >>> graficar_serie_temporal(datos, labels, (0, 500), 'blue', 'linea', './grafico_linea.png')
+        >>> # Gráfico de barras
+        >>> graficar_serie_temporal(datos, labels, (0, 500), 'green', 'barras', './grafico_barras.png')
     '''
     # Crear figura
     plt.figure(figsize=(15, 6))
 
-    # Graficar serie temporal
-    plt.plot(data.index, data[data.columns[0]], color)
+    # Graficar según el tipo especificado
+    if tipo_grafico == 'linea':
+        plt.plot(data.index, data[data.columns[0]], color=color)
+    elif tipo_grafico == 'barras':
+        plt.bar(data.index, data[data.columns[0]], color=color,
+                width=0.8, edgecolor='black', linewidth=0.5, zorder=3)
+    else:
+        raise ValueError(f"tipo_grafico debe ser 'linea' o 'barras', se recibió: {tipo_grafico}")
 
     # Configurar límites de ejes
     plt.ylim(ylims[0], ylims[1])
@@ -48,10 +65,9 @@ def graficar_serie_temporal(data: pd.DataFrame, labels: List[str], ylims: Tuple[
 
     # Guardar figura si se especifica ruta
     if ruta_guardado:
-        plt.savefig(ruta_guardado)
+        plt.savefig(ruta_guardado, dpi=300, bbox_inches='tight')
 
     plt.show()
-
 
 def boxplot_mensual(datos_mensuales: pd.DataFrame, ylabel: str, titulo: str) -> None:
     '''
