@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+import matplotlib.dates as mdates
 
 def parametros_IDF(prec_max_TR):
     """""
